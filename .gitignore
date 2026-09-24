@@ -2,6 +2,7 @@
 .build/
 .swiftpm/
 .vscode/
+.worktrees/
 cc-pear.app/
 backups/
 docs/superpowers/
