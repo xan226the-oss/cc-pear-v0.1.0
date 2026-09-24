@@ -166,7 +166,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
 
         setupEditorWindowIfNeeded()
-        editorStore.enqueue(path: path, title: title.isEmpty ? "图片" : title)
+        editorStore.prepare(
+            recentScreenshots: store.recentScreenshots(limit: 10),
+            selectedPath: path,
+            selectedTitle: title.isEmpty ? "图片" : title
+        )
         NSApp.activate(ignoringOtherApps: true)
         editorWindow?.makeKeyAndOrderFront(nil)
     }

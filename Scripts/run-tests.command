@@ -86,6 +86,11 @@ swiftc -parse-as-library \
   -o "$TEST_BIN_DIR/image-editor-view-tests"
 "$TEST_BIN_DIR/image-editor-view-tests"
 
+swiftc -parse-as-library \
+  Tests/ClipboardShelfTests/EditorLaunchWiringTests.swift \
+  -o "$TEST_BIN_DIR/editor-launch-wiring-tests"
+"$TEST_BIN_DIR/editor-launch-wiring-tests"
+
 swiftc -typecheck \
   $(find Sources/ClipboardShelf -name '*.swift' ! -name 'ClipboardShelfApp.swift' -print) \
   Tests/ClipboardShelfTests/AppDelegateEditorCompileTests.swift \
