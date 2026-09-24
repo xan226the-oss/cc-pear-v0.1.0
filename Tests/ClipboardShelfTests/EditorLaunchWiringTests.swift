@@ -10,8 +10,15 @@ enum EditorLaunchWiringTests {
         guard source.contains("recentScreenshots: store.recentScreenshots(limit: 10)") else {
             throw WiringFailure()
         }
+        guard source.contains("""
+                closePopover()
+                setupEditorWindowIfNeeded()
+        """) else {
+            throw PopoverDismissalFailure()
+        }
         print("EditorLaunchWiringTests passed")
     }
 }
 
 private struct WiringFailure: Error {}
+private struct PopoverDismissalFailure: Error {}

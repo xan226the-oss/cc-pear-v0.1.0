@@ -165,6 +165,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             return
         }
 
+        closePopover()
         setupEditorWindowIfNeeded()
         editorStore.prepare(
             recentScreenshots: store.recentScreenshots(limit: 10),
