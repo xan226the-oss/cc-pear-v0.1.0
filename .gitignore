@@ -1,0 +1,12 @@
+.DS_Store
+.build/
+.swiftpm/
+.vscode/
+cc-pear.app/
+backups/
+docs/superpowers/
+build-assets/dmg-stage/
+github-release/
+分享版/
+*.dmg
+*.zip
