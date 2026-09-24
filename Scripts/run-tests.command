@@ -54,6 +54,12 @@ swiftc -parse-as-library \
 "$TEST_BIN_DIR/screenshot-restore-policy-tests"
 
 swiftc -parse-as-library \
+  Sources/ClipboardShelf/PopoverPresentationPolicy.swift \
+  Tests/ClipboardShelfTests/PopoverPresentationPolicyTests.swift \
+  -o "$TEST_BIN_DIR/popover-presentation-policy-tests"
+"$TEST_BIN_DIR/popover-presentation-policy-tests"
+
+swiftc -parse-as-library \
   Sources/ClipboardShelf/Utilities.swift \
   Sources/ClipboardShelf/AnnotationModels.swift \
   Sources/ClipboardShelf/AnnotationRenderer.swift \

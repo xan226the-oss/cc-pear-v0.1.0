@@ -97,7 +97,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
     }
 
-    func showPopover(activate: Bool = true, reposition: Bool = false, preferFloating: Bool = false) {
+    func showPopover(reposition: Bool = false, preferFloating: Bool = false) {
         if panel == nil {
             setupPanel()
         }
@@ -108,7 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             hasPositionedPanel = true
         }
         panel.level = isPinned || preferFloating ? .statusBar : .normal
-        if activate {
+        if PopoverPresentationPolicy.activatesApplication {
             NSApp.activate(ignoringOtherApps: true)
             panel.makeKeyAndOrderFront(nil)
         } else {
@@ -342,7 +342,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         installHotKeyHandlerIfNeeded()
 
         HotKeyDispatcher.popoverAction = { [weak self] in
-            self?.showPopover(activate: false, reposition: true, preferFloating: true)
+            self?.showPopover(reposition: true, preferFloating: true)
         }
 
         var ref: EventHotKeyRef?
