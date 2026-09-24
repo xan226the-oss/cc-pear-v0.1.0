@@ -84,6 +84,10 @@ final class ClipboardStore: ObservableObject {
         entries.contains { $0.kind == .image && $0.checksum == checksum }
     }
 
+    func recentScreenshots(limit: Int = 10) -> [RecentScreenshotReference] {
+        RecentScreenshotSelector.select(from: entries, limit: limit)
+    }
+
     func filteredEntries(query: String, filter: KindFilter, scope: TimeScope) -> [ClipboardEntry] {
         let cutoff = scope == .favorites ? nil : Date().addingTimeInterval(-scope.interval)
         let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
