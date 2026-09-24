@@ -33,7 +33,7 @@ final class ImageEditorStore: ObservableObject {
 
     @discardableResult
     func enqueue(path: String, title: String) -> UUID {
-        let canonicalPath = URL(fileURLWithPath: path).standardizedFileURL.resolvingSymlinksInPath().path
+        let canonicalPath = canonicalPath(path)
         if let existing = sessions.first(where: { $0.imagePath == canonicalPath }) {
             selectedSessionID = existing.id
             selectedAnnotationID = nil
@@ -45,6 +45,44 @@ final class ImageEditorStore: ObservableObject {
         selectedSessionID = session.id
         selectedAnnotationID = nil
         return session.id
+    }
+
+    func prepare(
+        recentScreenshots: [RecentScreenshotReference],
+        selectedPath: String,
+        selectedTitle: String
+    ) {
+        let selectedPath = canonicalPath(selectedPath)
+        var sessionsByPath = Dictionary(uniqueKeysWithValues: sessions.map { ($0.imagePath, $0) })
+        var orderedPaths: [String] = []
+
+        for reference in recentScreenshots {
+            let path = canonicalPath(reference.path)
+            if sessionsByPath[path] == nil {
+                sessionsByPath[path] = ImageEditSession(imagePath: path, title: reference.title)
+            }
+            if !orderedPaths.contains(path) {
+                orderedPaths.append(path)
+            }
+        }
+
+        if sessionsByPath[selectedPath] == nil {
+            sessionsByPath[selectedPath] = ImageEditSession(
+                imagePath: selectedPath,
+                title: selectedTitle
+            )
+        }
+        if !orderedPaths.contains(selectedPath) {
+            orderedPaths.insert(selectedPath, at: 0)
+        }
+
+        for session in sessions where session.isDirty && !orderedPaths.contains(session.imagePath) {
+            orderedPaths.append(session.imagePath)
+        }
+
+        sessions = orderedPaths.compactMap { sessionsByPath[$0] }
+        selectedSessionID = sessionsByPath[selectedPath]?.id
+        selectedAnnotationID = nil
     }
 
     func session(id: UUID) -> ImageEditSession? {
@@ -160,5 +198,9 @@ final class ImageEditorStore: ObservableObject {
             return
         }
         mutation(&sessions[index])
+    }
+
+    private func canonicalPath(_ path: String) -> String {
+        URL(fileURLWithPath: path).standardizedFileURL.resolvingSymlinksInPath().path
     }
 }

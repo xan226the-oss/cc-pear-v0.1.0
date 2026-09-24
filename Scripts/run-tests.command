@@ -31,6 +31,8 @@ swiftc -parse-as-library \
 
 swiftc -parse-as-library \
   Sources/ClipboardShelf/Utilities.swift \
+  Sources/ClipboardShelf/Models.swift \
+  Sources/ClipboardShelf/RecentScreenshotSelector.swift \
   Sources/ClipboardShelf/AnnotationModels.swift \
   Sources/ClipboardShelf/AnnotationRenderer.swift \
   Sources/ClipboardShelf/ImageEditorStore.swift \
@@ -68,6 +70,8 @@ swiftc -parse-as-library \
 
 swiftc -parse-as-library \
   Sources/ClipboardShelf/Utilities.swift \
+  Sources/ClipboardShelf/Models.swift \
+  Sources/ClipboardShelf/RecentScreenshotSelector.swift \
   Sources/ClipboardShelf/AnnotationModels.swift \
   Sources/ClipboardShelf/AnnotationRenderer.swift \
   Sources/ClipboardShelf/ImageEditorStore.swift \

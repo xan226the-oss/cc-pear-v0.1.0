@@ -6,6 +6,8 @@ enum ImageEditorStoreTests {
     static func main() throws {
         try enqueueSelectsNewestWithoutDroppingExistingSession()
         try enqueueSamePathSelectsExistingSession()
+        try prepareLoadsRecentScreenshotsAndSelectsRequestedImage()
+        try preparePreservesDirtySessionState()
         try completionMarksOnlyCurrentSessionSaved()
         print("ImageEditorStoreTests passed")
     }
@@ -27,6 +29,41 @@ enum ImageEditorStoreTests {
 
         try expect(first == second, "canonical duplicate path created a second session")
         try expect(store.sessions.count == 1, "duplicate path was not deduplicated")
+    }
+
+    private static func prepareLoadsRecentScreenshotsAndSelectsRequestedImage() throws {
+        let store = ImageEditorStore(output: RecordingOutput())
+        store.prepare(
+            recentScreenshots: [
+                RecentScreenshotReference(path: "/tmp/new.png", title: "New"),
+                RecentScreenshotReference(path: "/tmp/old.png", title: "Old")
+            ],
+            selectedPath: "/tmp/old.png",
+            selectedTitle: "Old"
+        )
+
+        let expected = [canonicalPath("/tmp/new.png"), canonicalPath("/tmp/old.png")]
+        try expect(store.sessions.map(\.imagePath) == expected, "recent screenshot order changed")
+        try expect(store.selectedSession?.imagePath == canonicalPath("/tmp/old.png"), "requested image was not selected")
+    }
+
+    private static func preparePreservesDirtySessionState() throws {
+        let store = ImageEditorStore(output: RecordingOutput())
+        let id = store.enqueue(path: "/tmp/dirty.png", title: "Dirty")
+        store.apply(.add(.rectangle(
+            id: UUID(),
+            rect: CGRect(x: 0, y: 0, width: 8, height: 8),
+            style: .default
+        )))
+
+        store.prepare(
+            recentScreenshots: [RecentScreenshotReference(path: "/tmp/new.png", title: "New")],
+            selectedPath: "/tmp/new.png",
+            selectedTitle: "New"
+        )
+
+        try expect(store.session(id: id)?.isDirty == true, "sync discarded a dirty session")
+        try expect(store.session(id: id)?.annotations.count == 1, "sync discarded annotations")
     }
 
     private static func completionMarksOnlyCurrentSessionSaved() throws {
@@ -58,6 +95,10 @@ enum ImageEditorStoreTests {
     private static func require<T>(_ value: T?) throws -> T {
         guard let value else { throw TestFailure(message: "required value was nil") }
         return value
+    }
+
+    private static func canonicalPath(_ path: String) -> String {
+        URL(fileURLWithPath: path).standardizedFileURL.resolvingSymlinksInPath().path
     }
 
     private static func expect(_ condition: Bool, _ message: String) throws {
