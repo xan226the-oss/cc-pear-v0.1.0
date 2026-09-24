@@ -320,3 +320,72 @@ gh api repos/xan226the-oss/cc-pear-v0.1.0/commits/main --jq '{sha:.sha,message:.
 ```
 
 Expected: 远端 `main` 的 SHA 等于本地 `git rev-parse HEAD`，提交信息为 `Show recent screenshots in image editor`。
+
+### Task 4: 打开编辑器时收起剪贴板小窗
+
+**Files:**
+- Modify: `Sources/ClipboardShelf/AppDelegate.swift`
+- Modify: `Tests/ClipboardShelfTests/EditorLaunchWiringTests.swift`
+- Modify: `README.md`
+
+**Interfaces:**
+- Consumes: 已有 `AppDelegate.closePopover()`。
+- Produces: `showImageEditor(path:title:)` 在创建或显示编辑窗口前收起剪贴板 panel。
+
+- [ ] **Step 1: 扩展失败的接线测试**
+
+在 `EditorLaunchWiringTests.swift` 中新增：
+
+```swift
+guard source.contains("""
+        closePopover()
+        setupEditorWindowIfNeeded()
+""") else {
+    throw PopoverDismissalFailure()
+}
+```
+
+并定义 `private struct PopoverDismissalFailure: Error {}`。
+
+- [ ] **Step 2: 运行测试并确认正确失败**
+
+Run: `./Scripts/run-tests.command`
+
+Expected: 前置测试通过，`EditorLaunchWiringTests` FAIL with `PopoverDismissalFailure`，因为当前 `showImageEditor` 未收起 panel。
+
+- [ ] **Step 3: 实现最小行为修改**
+
+在 `showImageEditor` 的图片有效性检查通过后、`setupEditorWindowIfNeeded()` 之前调用：
+
+```swift
+closePopover()
+setupEditorWindowIfNeeded()
+```
+
+不调用 `store.clearAll()`、`NSApp.terminate` 或任何外部应用 API。关闭编辑器的现有 `windowShouldClose` 保持不变，因此不会自动恢复 panel。
+
+- [ ] **Step 4: 更新用户文档**
+
+将 README 的“最近截图”说明更新为：
+
+```markdown
+- 最近截图：打开图片编辑器时会自动收起剪贴板小窗，左侧显示最近 10 张系统截图，可直接切换；每张图的未保存标注独立保留。
+```
+
+- [ ] **Step 5: 验证、重建并提交**
+
+Run:
+
+```bash
+./Scripts/run-tests.command
+swift build -c release -Xswiftc -warnings-as-errors
+git diff --check
+./Scripts/build-app.command
+```
+
+Expected: 所有测试通过，Debug 和 Release 构建成功，无空白错误，App 构建成功。
+
+```bash
+git add Sources/ClipboardShelf/AppDelegate.swift Tests/ClipboardShelfTests/EditorLaunchWiringTests.swift README.md
+git commit -m "Dismiss clipboard panel when editing an image"
+```
